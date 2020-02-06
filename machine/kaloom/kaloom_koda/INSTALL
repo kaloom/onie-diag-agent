@@ -1,0 +1,84 @@
+===========================================
+Loading Kaloom ONIE Diagnostic Agent (KODA)
+===========================================
+
+Introduction
+============
+
+The Kaloom ONIE Diagnostic Agent (KODA) is a Linux image with...
+
+It is intended to run in-memory...
+
+The KODA goals:
+  - provide a diagnostic image that is:
+      - fit to probe the switch configuration
+      - extendable (new utilities tools can be added)
+  - avoid polluting the switch:
+      - run in-memory
+      - doesn't alter the disk no partitioning, installation. writing, ...)
+      - doesn't alter the boot configuration
+
+
+Cross-Compiling KODA
+====================
+
+KODA is a fork of the main open source ONIE project (GPL). It is sitting in
+GitHub under the Kaloom organization. 
+
+To clone the project:
+  $ cd ${HOME}
+  $ git clone https://github.com/kaloom/onie-diag-agent.git
+
+The project comes with a contribution that creates a Docker image suitable
+for cross-compiling ONIE:
+  $ cd ${HOME}/onie-diag-agent/contrib/build-env
+  $ docker build -t debian:build-env .
+  $ docker images | grep build-env
+    REPOSITORY      TAG           IMAGE ID        CREATED         SIZE
+    debian          build-env     992e9550cc26    3 hours ago     650 MB
+
+To compile the project, start the build container
+  $ docker run --privileged --it -v ${HOME}/onie-diag-agent:/home/build/src debian:build-env
+  build@<container-id>:~$
+
+then build from the build-config folder:
+  $ cd /home/build/src/build-config
+  $ make -j4 MACHINEROOT=../machine/kaloom MACHINE=kaloom_koda all demo
+
+Alternatively, you can create a local.make file that will hold the MACHINEROOT and
+MACHINE variables and use the simplified command:
+  $ make -j4 all demo
+
+When complete, the ONIE binaries are located in build/images:
+  $ ls /home/build/src/build/images
+    -rw-r--r--. 1 12453128 Feb  6 08:55 demo-diag-installer-x86_64-kaloom_koda-r0.bin
+    -rw-r--r--. 1 12453128 Feb  6 08:55 demo-installer-x86_64-kaloom_koda-r0.bin
+    -rw-r--r--. 1  8720452 Feb  6 08:51 kaloom_koda-r0.initrd
+    -rw-r--r--. 1  3718288 Feb  6 08:55 kaloom_koda-r0.vmlinuz
+    -rw-r--r--. 1 31399936 Feb  6 08:56 onie-recovery-x86_64-kaloom_koda-r0.efi64.pxe
+    -rw-r--r--. 1 28770304 Feb  6 08:56 onie-recovery-x86_64-kaloom_koda-r0.iso
+    -rw-r--r--. 1 12494711 Feb  6 08:55 onie-updater-x86_64-kaloom_koda-r0
+
+where:
+    - kaloom_koda-r0.vmlinuz                    is the ONIE kernel image
+    - kaloom_koda-r0.initrd                     is the ONIE initramfs (filesystem)
+    - onie-recovery-x86_64-kaloom_koda-r0.iso   is the ONIE recovery ISO image (for USB)
+    - onie-recovery-x86_64-kaloom_koda-r0.efi64.pxe    ONIE recovery ISO image (PXE variant)
+    - onie-updater-x86_64-kaloom_koda-r0        is the ONIE self-update image
+    - demo-diag-installer-x86_64-kaloom_koda-r0.bin    the KODA image 
+    - demo-installer-x86_64-kaloom_koda-r0.bin         the KODA image (same as above)
+
+
+Deploying KODA on a switch
+==========================
+
+In order to deploy the KODA image, you need to [TBC]
+...
+
+
+Adding a utility to KODA
+========================
+
+In order to add a utility to the KODA image, you need to [TBC]
+...
+
