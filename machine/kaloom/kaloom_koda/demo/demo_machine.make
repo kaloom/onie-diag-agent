@@ -3,7 +3,7 @@
 #
 #-------------------------------------------------------------------------------
 #
-# This is a makefile fragment that copy library for pegatron mercedes to sysroot
+# This is a makefile fragment that copy library for KODA to sysroot
 #
 
 DEMO_INSTALL_SCRIPT = $(abspath ../demo/installer/grub-arch/install.sh)
