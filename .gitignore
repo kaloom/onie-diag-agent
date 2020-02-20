@@ -1,3 +1,4 @@
+# Original stuff
 *.pyc
 /cscope.out
 /cscope.out.in
@@ -5,3 +6,9 @@
 build
 local.make
 onie-installer
+
+# Ignore Gradle project-specific cache directory
+.gradle
+
+# Potentially lingering file
+demo/installer/grub-arch/install.sh.ori

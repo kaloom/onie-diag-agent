@@ -1,0 +1,128 @@
+/****************************************************************
+ * Copyright (c) Kaloom Inc., 2020
+ *
+ * This unpublished material is property of Kaloom Inc.
+ * All rights reserved.
+ * Reproduction or distribution, in whole or in part, is
+ * forbidden except by express written permission of Kaloom Inc.
+ *
+ * sbug : set build user and group
+ ****************************************************************/
+
+buildscript {
+    repositories {
+        maven {
+            url "${project.httpBin}/buildscript"
+        }
+        dependencies {
+            classpath "io.kaloom.gradle:build-plugin:${gradleBuildPluginVersion}"
+            classpath "io.kaloom.gradle:docker-plugin:${gradleDockerPluginVersion}"
+        }
+    }
+}
+
+plugins {
+    id 'com.jfrog.artifactory' version '4.7.3'
+    id "maven-publish"
+    id 'pl.allegro.tech.build.axion-release' version '1.10.2'
+}
+
+apply plugin: 'io.kaloom.gradle.build-plugin'
+apply plugin: 'io.kaloom.gradle.docker-plugin'
+
+import io.kaloom.gradle.docker.tasks.DockerBuildImage
+
+scmVersion {
+    useHighestVersion = false
+    repository {
+        pushTagsOnly = true
+        ignoreUncommittedChanges = false
+    }
+    tag {
+        prefix='v'
+        versionSeparator = ''
+    }
+    nextVersion {
+        suffix = 'SNAPSHOT'
+        separator = '-'
+    }
+}
+
+version = scmVersion.version
+group   'io.kaloom.tools'
+
+defaultTasks 'build'
+
+// Build the build container
+task buildDockerImage(type: DockerBuildImage) {
+    inputDir = file("${projectDir}/contrib/build-env")
+    dockerFile = file("${inputDir.get()}/Dockerfile-sbug")
+    buildArgs = [BUILD_USER_ID: "${["id", "-u"].execute().text.trim()}",
+                 BUILD_GROUP_ID: "${["id", "-g"].execute().text.trim()}"]
+	pull = true
+	remove = true
+}
+
+// Cleanup using the build container
+task clean {
+    dependsOn buildDockerImage
+    doLast {
+        exec {
+            workingDir "${projectDir}"
+            commandLine 'docker', 'run', '--rm', '--privileged', \
+                '-v', "${projectDir}:/home/build/src", \
+                "${buildDockerImage.getImageId().get()}", \
+                'bash', '-c', 'cd /home/build/src/build-config && make clean'
+        }
+        // Restore the original install.sh
+        // 'git restore' is a fairly recent command so use the venerable 'git checkout' instead
+        exec {
+            workingDir "${projectDir}"
+            commandLine 'git', 'checkout', '--', 'demo/installer/grub-arch/install.sh'
+        }
+    }
+}
+
+// Build the Onie Agent
+task buildOnieAgent {
+    dependsOn buildDockerImage
+    doLast {
+        exec {
+            workingDir "${projectDir}"
+            commandLine 'docker', 'run', '--rm', '--privileged', \
+                '-v', "${projectDir}:/home/build/src", \
+                "${buildDockerImage.getImageId().get()}", \
+                'bash', '-c', 'cd /home/build/src/build-config && make -j4 all demo'
+        }
+        // Restore the original install.sh
+        // 'git restore' is a fairly recent command so use the venerable 'git checkout' instead
+        exec {
+            workingDir "${projectDir}"
+            commandLine 'git', 'checkout', '--', 'demo/installer/grub-arch/install.sh'
+        }
+    }
+}
+
+task build {
+    dependsOn buildOnieAgent
+}
+
+publishing {
+    publications {
+        binaries(MavenPublication) {
+            artifact(
+                    source: "${buildDir}/images/demo-diag-installer-x86_64-kaloom_onie_probe-r0.bin",
+                    classifier: "${rootProject.name}",
+                    extension: "bin"
+            )
+        }
+    }
+}
+
+artifactory {
+    publish {
+        defaults {
+            publications(publishing.publications.binaries)
+        }
+    }
+}
