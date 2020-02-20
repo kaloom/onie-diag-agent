@@ -83,8 +83,8 @@ task clean {
     }
 }
 
-// Build the Onie Agent
-task buildOnieAgent {
+// Build the Onie Probe
+task buildOnieProbe {
     dependsOn buildDockerImage
     doLast {
         exec {
@@ -104,7 +104,7 @@ task buildOnieAgent {
 }
 
 task build {
-    dependsOn buildOnieAgent
+    dependsOn buildOnieProbe
 }
 
 publishing {

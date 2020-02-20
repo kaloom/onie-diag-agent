@@ -43,19 +43,19 @@ intf=${onie_disco_interface}
 is_accton=$(grep 'accton' ${onie_sysinfo})
 if [[ ! -z "${is_accton}" ]]; then
    ts_speed=${accton_ts_speed}
-   intf='enp2s0'
 fi
 
 # Inventec tweaks
 is_inventec=$(grep 'inventec' ${onie_sysinfo})
 if [[ ! -z "${is_inventec}" ]]; then
    ts_speed=${inventec_ts_speed}
-   intf='p2p1'
 fi
 
+# Our IP address
+ip_addr=$(hostname -I | awk '{print $1}')
+
 # Set the management interface arguments
-read mgmt_mac_addr < /sys/class/net/${onie_disco_interface}/address
-mgmt_args="ifname=${intf}:${mgmt_mac_addr} ip=${intf}:dhcp"
+mgmt_args="ip=${ip_addr}"
 
 # Format the kernel arguments
 kernel_args="transparent_hugepage=never --- console=ttyS0,${ts_speed} ${mgmt_args} nousb"
