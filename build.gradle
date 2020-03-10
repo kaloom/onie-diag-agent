@@ -112,7 +112,6 @@ publishing {
         binaries(MavenPublication) {
             artifact(
                     source: "${buildDir}/images/demo-diag-installer-x86_64-kaloom_onie_probe-r0.bin",
-                    classifier: "${rootProject.name}",
                     extension: "bin"
             )
         }
