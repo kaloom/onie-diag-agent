@@ -55,6 +55,7 @@ defaultTasks 'build'
 
 // Build the build container
 task buildDockerImage(type: DockerBuildImage) {
+    description 'Build the docker image (builder)'
     inputDir = file("${projectDir}/contrib/build-env")
     dockerFile = file("${inputDir.get()}/Dockerfile-sbug")
     buildArgs = [BUILD_USER_ID: "${["id", "-u"].execute().text.trim()}",
@@ -65,6 +66,7 @@ task buildDockerImage(type: DockerBuildImage) {
 
 // Cleanup using the build container
 task clean {
+    description 'Clean the project'
     dependsOn buildDockerImage
     doLast {
         exec {
@@ -83,8 +85,9 @@ task clean {
     }
 }
 
-// Build the Onie Probe
+// Build the Onie Probe (and the PXE material as a side-effect)
 task buildOnieProbe {
+    description 'Build the ONIE probe'
     dependsOn buildDockerImage
     doLast {
         exec {
@@ -103,8 +106,54 @@ task buildOnieProbe {
     }
 }
 
-task build {
+// Prepare the folder for the final tar
+task prepareTarFolder {
+    description 'Prepare tar folder'
     dependsOn buildOnieProbe
+
+    doLast {
+        exec {
+            workingDir "${buildDir}"
+            commandLine 'rm', '-rf', 'onie-probe'
+        }
+        exec {
+            workingDir "${buildDir}"
+            commandLine 'mkdir', '-p', 'onie-probe/onie'
+        }
+        exec {
+            workingDir "${buildDir}"
+            commandLine 'mkdir', '-p', 'onie-probe/pxe'
+        }
+    }
+
+    doLast {
+        exec {
+            workingDir "${buildDir}/onie-probe/onie"
+            commandLine 'ln', '-s', '../../images/demo-diag-installer-x86_64-kaloom_onie_probe-r0.bin', 'onie-installer'
+        }
+        exec {
+            workingDir "${buildDir}/onie-probe/pxe"
+            commandLine 'ln', '-s', '../../images/kaloom_onie_probe-r0.vmlinuz', 'vmlinuz'
+        }
+        exec {
+            workingDir "${buildDir}/onie-probe/pxe"
+            commandLine 'ln', '-s', '../../images/kaloom_onie_probe-r0.initrd', 'initrd.img'
+        }
+    }
+}
+
+task build(type: Tar) {
+    description 'Make the final assembly'
+    dependsOn buildOnieProbe
+    dependsOn prepareTarFolder
+
+    from "${buildDir}/onie-probe"
+    into "onie-probe"
+
+    baseName "onie-probe"
+    extension "tgz"
+    compression Compression.GZIP
+    destinationDir file("${buildDir}")
 }
 
 publishing {
