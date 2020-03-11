@@ -111,33 +111,29 @@ task prepareTarFolder {
     description 'Prepare tar folder'
     dependsOn buildOnieProbe
 
-    doLast {
+    doFirst {
         exec {
             workingDir "${buildDir}"
-            commandLine 'rm', '-rf', 'onie-probe'
+            commandLine 'rm', '-rf', 'probes'
         }
         exec {
             workingDir "${buildDir}"
-            commandLine 'mkdir', '-p', 'onie-probe/onie'
-        }
-        exec {
-            workingDir "${buildDir}"
-            commandLine 'mkdir', '-p', 'onie-probe/pxe'
+            commandLine 'mkdir', 'probes'
         }
     }
 
     doLast {
         exec {
-            workingDir "${buildDir}/onie-probe/onie"
-            commandLine 'ln', '-s', '../../images/demo-diag-installer-x86_64-kaloom_onie_probe-r0.bin', 'onie-installer'
+            workingDir "${buildDir}/probes"
+            commandLine 'ln', '-s', '../images/demo-diag-installer-x86_64-kaloom_onie_probe-r0.bin', 'onie-probe'
         }
         exec {
-            workingDir "${buildDir}/onie-probe/pxe"
-            commandLine 'ln', '-s', '../../images/kaloom_onie_probe-r0.vmlinuz', 'vmlinuz'
+            workingDir "${buildDir}/probes"
+            commandLine 'ln', '-s', '../images/kaloom_onie_probe-r0.vmlinuz', 'pxe-probe-vmlinuz'
         }
         exec {
-            workingDir "${buildDir}/onie-probe/pxe"
-            commandLine 'ln', '-s', '../../images/kaloom_onie_probe-r0.initrd', 'initrd.img'
+            workingDir "${buildDir}/probes"
+            commandLine 'ln', '-s', '../images/kaloom_onie_probe-r0.initrd', 'pxe-probe-initrd.img'
         }
     }
 }
@@ -147,7 +143,7 @@ task build(type: Tar) {
     dependsOn buildOnieProbe
     dependsOn prepareTarFolder
 
-    from "${buildDir}/onie-probe"
+    from "${buildDir}/probes"
     into "onie-probe"
 
     baseName "onie-probe"
@@ -160,8 +156,8 @@ publishing {
     publications {
         binaries(MavenPublication) {
             artifact(
-                    source: "${buildDir}/images/demo-diag-installer-x86_64-kaloom_onie_probe-r0.bin",
-                    extension: "bin"
+                    source: "${buildDir}/onie-probe.tgz",
+                    extension: "tgz"
             )
         }
     }
