@@ -1,15 +1,15 @@
 =========================
-Loading Kaloom ONIE Probe
+Loading Kaloom Node Probe
 =========================
 
 Introduction
 ============
 
-The Kaloom ONIE Probe is a Linux image with...
+The Kaloom Node Probe is a Linux image with...
 
 It is intended to run in-memory...
 
-The ONIE Probe goals:
+The Node Probe goals:
   - provide a diagnostic image that is:
       - fit to probe the switch configuration
       - extendable (new utilities tools can be added)
@@ -19,10 +19,10 @@ The ONIE Probe goals:
       - doesn't alter the boot configuration
 
 
-Cross-Compiling ONIE Probe
+Cross-Compiling Node Probe
 ==========================
 
-The Kaloom ONIE Probe is a fork of the main open source ONIE project (GPL).
+The Kaloom Node Probe is a fork of the main open source ONIE project (GPL).
 It is sitting in GitHub under the Kaloom organization. 
 
 To clone the project:
@@ -43,7 +43,7 @@ To compile the project, start the build container
 
 then build from the build-config folder:
   $ cd /home/build/src/build-config
-  $ make -j4 MACHINEROOT=../machine/kaloom MACHINE=kaloom_onie_probe all demo
+  $ make -j4 MACHINEROOT=../machine/kaloom MACHINE=kaloom_node_probe all demo
 
 Alternatively, you can create a local.make file that will hold the MACHINEROOT and
 MACHINE variables and use the simplified command:
@@ -52,21 +52,21 @@ MACHINE variables and use the simplified command:
 When complete, the ONIE binaries are located in build/images:
   $ ls /home/build/src/build/images
     -rw-r--r--. 1 12453128 Feb  6 08:55 demo-diag-installer-x86_64-kaloom_probe-r0.bin
-    -rw-r--r--. 1 12453128 Feb  6 08:55 demo-installer-x86_64-kaloom_onie-probe-r0.bin
-    -rw-r--r--. 1  8720452 Feb  6 08:51 kaloom_onie-probe-r0.initrd
-    -rw-r--r--. 1  3718288 Feb  6 08:55 kaloom_onie-probe-r0.vmlinuz
-    -rw-r--r--. 1 31399936 Feb  6 08:56 onie-recovery-x86_64-kaloom_onie-probe-r0.efi64.pxe
-    -rw-r--r--. 1 28770304 Feb  6 08:56 onie-recovery-x86_64-kaloom_onie-probe-r0.iso
-    -rw-r--r--. 1 12494711 Feb  6 08:55 onie-updater-x86_64-kaloom_onie-probe-r0
+    -rw-r--r--. 1 12453128 Feb  6 08:55 demo-installer-x86_64-kaloom_node-probe-r0.bin
+    -rw-r--r--. 1  8720452 Feb  6 08:51 kaloom_node-probe-r0.initrd
+    -rw-r--r--. 1  3718288 Feb  6 08:55 kaloom_node-probe-r0.vmlinuz
+    -rw-r--r--. 1 31399936 Feb  6 08:56 onie-recovery-x86_64-kaloom_node-probe-r0.efi64.pxe
+    -rw-r--r--. 1 28770304 Feb  6 08:56 onie-recovery-x86_64-kaloom_node-probe-r0.iso
+    -rw-r--r--. 1 12494711 Feb  6 08:55 onie-updater-x86_64-kaloom_node-probe-r0
 
 where:
-    - kaloom_onie_probe-r0.vmlinuz                    is the ONIE kernel image
-    - kaloom_onie_probe-r0.initrd                     is the ONIE initramfs (filesystem)
-    - onie-recovery-x86_64-kaloom_onie_probe-r0.iso   is the ONIE recovery ISO image (for USB)
-    - onie-recovery-x86_64-kaloom_onie_probe-r0.efi64.pxe    ONIE recovery ISO image (PXE variant)
-    - onie-updater-x86_64-kaloom_onie_probe-r0        is the ONIE self-update image
-    - demo-diag-installer-x86_64-kaloom_onie_probe-r0.bin    the ONIE Probe image 
-    - demo-installer-x86_64-kaloom_onie_probe-r0.bin         the ONIE Probe image (same as above)
+    - kaloom_node_probe-r0.vmlinuz                    is the ONIE kernel image
+    - kaloom_noed_probe-r0.initrd                     is the ONIE initramfs (filesystem)
+    - onie-recovery-x86_64-kaloom_node_probe-r0.iso   is the ONIE recovery ISO image (for USB)
+    - onie-recovery-x86_64-kaloom_node_probe-r0.efi64.pxe    ONIE recovery ISO image (PXE variant)
+    - onie-updater-x86_64-kaloom_node_probe-r0        is the ONIE self-update image
+    - demo-diag-installer-x86_64-kaloom_node_probe-r0.bin    the ONIE Probe image 
+    - demo-installer-x86_64-kaloom_node_probe-r0.bin         the ONIE Probe image (same as above)
 
 
 Deploying ONIE Probe on a switch

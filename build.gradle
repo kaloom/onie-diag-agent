@@ -125,15 +125,15 @@ task prepareTarFolder {
     doLast {
         exec {
             workingDir "${buildDir}/probes"
-            commandLine 'ln', '-s', '../images/demo-diag-installer-x86_64-kaloom_onie_probe-r0.bin', 'onie-probe'
+            commandLine 'ln', '-s', '../images/demo-diag-installer-x86_64-kaloom_node_probe-r0.bin', 'onie-probe'
         }
         exec {
             workingDir "${buildDir}/probes"
-            commandLine 'ln', '-s', '../images/kaloom_onie_probe-r0.vmlinuz', 'pxe-probe-vmlinuz'
+            commandLine 'ln', '-s', '../images/kaloom_node_probe-r0.vmlinuz', 'pxe-probe-vmlinuz'
         }
         exec {
             workingDir "${buildDir}/probes"
-            commandLine 'ln', '-s', '../images/kaloom_onie_probe-r0.initrd', 'pxe-probe-initrd.img'
+            commandLine 'ln', '-s', '../kaloom_node_probe-r0/demo.initrd', 'pxe-probe-initrd.img'
         }
     }
 }

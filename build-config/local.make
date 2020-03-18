@@ -17,7 +17,7 @@
 MACHINEROOT = $(realpath ../machine/kaloom)
 
 # Set the default MACHINE to build
-MACHINE = kaloom_onie_probe
+MACHINE = kaloom_node_probe
 
 # Set the default directory for downloaded packages
 # DOWNLOADDIR = $(BUILDDIR)/download

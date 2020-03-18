@@ -1,4 +1,4 @@
-# Kaloom ONIE Probe
+# Kaloom Node Probe
 
 # Vendor's version number can be defined here.
 # Available variable is 'VENDOR_VERSION'.
