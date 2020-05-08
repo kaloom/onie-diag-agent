@@ -58,6 +58,7 @@ task buildDockerImage(type: DockerBuildImage) {
     description 'Build the docker image (builder)'
     inputDir = file("${projectDir}/contrib/build-env")
     dockerFile = file("${inputDir.get()}/Dockerfile-sbug")
+    network = 'host'
     buildArgs = [BUILD_USER_ID: "${["id", "-u"].execute().text.trim()}",
                  BUILD_GROUP_ID: "${["id", "-g"].execute().text.trim()}"]
 	pull = true
@@ -71,13 +72,15 @@ task clean {
     doLast {
         exec {
             workingDir "${projectDir}"
-            commandLine 'docker', 'run', '--rm', '--privileged', \
+            commandLine 'docker', 'run', '--rm', '--privileged', '--network=host', \
                 '-v', "${projectDir}:/home/build/src", \
                 "${buildDockerImage.getImageId().get()}", \
-                'bash', '-c', 'cd /home/build/src/build-config && make clean'
+                'bash', '-c', 'cd /home/build/src/build-config && make MACHINEROOT=../machine/kaloom MACHINE=kaloom_node_probe clean'
         }
-        // Restore the original install.sh
-        // 'git restore' is a fairly recent command so use the venerable 'git checkout' instead
+        exec {
+            workingDir "${buildDir}"
+            commandLine 'rm', '-rf', 'probes', 'onie-probe.tgz'
+        }
         exec {
             workingDir "${projectDir}"
             commandLine 'git', 'checkout', '--', 'demo/installer/grub-arch/install.sh'
@@ -85,17 +88,17 @@ task clean {
     }
 }
 
-// Build the Onie Probe (and the PXE material as a side-effect)
+// Build the ONIE Probe
 task buildOnieProbe {
     description 'Build the ONIE probe'
     dependsOn buildDockerImage
     doLast {
         exec {
             workingDir "${projectDir}"
-            commandLine 'docker', 'run', '--rm', '--privileged', \
+            commandLine 'docker', 'run', '--rm', '--privileged', '--network=host', \
                 '-v', "${projectDir}:/home/build/src", \
                 "${buildDockerImage.getImageId().get()}", \
-                'bash', '-c', 'cd /home/build/src/build-config && make -j4 all demo'
+                'bash', '-c', 'cd /home/build/src/build-config && make -j4 MACHINEROOT=../machine/kaloom MACHINE=kaloom_node_probe all demo'
         }
         // Restore the original install.sh
         // 'git restore' is a fairly recent command so use the venerable 'git checkout' instead
@@ -125,15 +128,19 @@ task prepareTarFolder {
     doLast {
         exec {
             workingDir "${buildDir}/probes"
-            commandLine 'ln', '-s', '../images/demo-diag-installer-x86_64-kaloom_node_probe-r0.bin', 'onie-probe'
+            commandLine 'ln', '-s', '../images/demo-diag-installer-x86_64-kaloom_node_probe-r0.bin', 'onie-probe.bin'
         }
         exec {
             workingDir "${buildDir}/probes"
-            commandLine 'ln', '-s', '../images/kaloom_node_probe-r0.vmlinuz', 'pxe-probe-vmlinuz'
+            commandLine 'ln', '-s', '../kaloom_node_probe-r0/recovery/x86_64-kaloom_node_probe-r0.initrd', 'kvm-onie-recovery.initrd'
         }
         exec {
             workingDir "${buildDir}/probes"
-            commandLine 'ln', '-s', '../kaloom_node_probe-r0/demo.initrd', 'pxe-probe-initrd.img'
+            commandLine 'ln', '-s', '../images/kaloom_node_probe-r0.vmlinuz', 'pxe-probe.vmlinuz'
+        }
+        exec {
+            workingDir "${buildDir}/probes"
+            commandLine 'ln', '-s', '../kaloom_node_probe-r0/demo.initrd', 'pxe-probe.initrd'
         }
     }
 }

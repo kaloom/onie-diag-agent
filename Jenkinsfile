@@ -11,7 +11,7 @@ runPipeline {
 
         gitlabBuilds(builds: builds) {
             kaloomStage("Build") {
-                buildInfo = builder.run timeout: 30, "build artifactoryPublish -si"
+                buildInfo = builder.run timeout: 90, "build artifactoryPublish -si"
             }
             kaloomStage("Publish", when: kaloomUtil.shouldPublish()) {
                 builder.promote("internal-releases")
